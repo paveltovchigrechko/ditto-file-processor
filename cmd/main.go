@@ -9,8 +9,8 @@ import (
 )
 
 const (
-	inputDir  string = "./input/"
-	outputDir string = "./output/"
+	inputDir  string = "../input/"
+	outputDir string = "../output/"
 
 	prefix string = ""
 	indent string = "    "
