@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"os"
 
@@ -25,13 +24,14 @@ func main() {
 	}
 
 	dittoJson := ditto.ExtractDittoKeys(file, projectName)
-	converted := []byte(fmt.Sprintf("%v", dittoJson))
-	os.Stdout.Write(converted)
+	encodedJson := ditto.EncodeDittoKeys(dittoJson)
+
+	os.Stdout.Write(encodedJson)
 }
 
 // Tests:
 // 1. Add tests (parsing filename, file, key in map)
 //     * Output file ()
 // 2. Split the main() -> separate functions
-// 3. Make this program as a part of pipeline: accept a single file (or filename) and output the result in std.Out
+// 3. Make this program as a part of pipeline: accept a single file (or filename) and output the result in stdout
 // 4. Think about Unicode in encoded JSON
