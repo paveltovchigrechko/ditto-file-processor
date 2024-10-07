@@ -1,6 +1,7 @@
 package validators
 
 import (
+	"errors"
 	"fmt"
 	"io/fs"
 	"os"
@@ -10,6 +11,14 @@ func ValidateFiles(files []fs.DirEntry, dir string) error {
 	if files == nil {
 		return fmt.Errorf("no files in %s", dir)
 	}
+	return nil
+}
+
+func ValidateFile(path string) error {
+	if _, err := os.Stat(path); errors.Is(err, os.ErrNotExist) {
+		return err
+	}
+
 	return nil
 }
 

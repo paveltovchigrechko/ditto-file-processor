@@ -1,42 +1,32 @@
 package main
 
 import (
+	"fmt"
 	"log"
+	"os"
 
 	"github.com/paveltovchigrechko/ditto-file-processor/internal/ditto"
 	"github.com/paveltovchigrechko/ditto-file-processor/internal/helpers"
 	"github.com/paveltovchigrechko/ditto-file-processor/internal/validators"
 )
 
-const (
-	inputDir  string = "../input/"
-	outputDir string = "../output/"
-)
-
 func main() {
-	files := ditto.ReadDittoFiles(inputDir)
-	err := validators.ValidateFiles(files, inputDir)
+	file := helpers.ReadArgs()[0]
+	err := validators.ValidateFile(file)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	for _, file := range files {
-		fn := file.Name()
-		projectName, localeName := ditto.SplitProjectAndLocale(fn)
+	projectName, localeName := ditto.SplitProjectAndLocale(file)
 
-		err := validators.ValidateNames(projectName, localeName, fn)
-		if err != nil {
-			continue
-		}
-
-		dittoJson := ditto.ExtractDittoKeys(inputDir+fn, projectName)
-
-		encodedDitto := ditto.EncodeDittoKeys(dittoJson)
-
-		// Might not work for Github action
-		helpers.CreateDir(outputDir)
-		ditto.CreateAndWriteJson(outputDir+localeName, encodedDitto)
+	err = validators.ValidateNames(projectName, localeName, file)
+	if err != nil {
+		log.Fatal(err)
 	}
+
+	dittoJson := ditto.ExtractDittoKeys(file, projectName)
+	converted := []byte(fmt.Sprintf("%v", dittoJson))
+	os.Stdout.Write(converted)
 }
 
 // Tests:

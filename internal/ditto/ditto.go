@@ -55,9 +55,9 @@ func ExtractDittoKeys(path, project string) interface{} {
 
 	if jsonBlob, ok := m[project]; !ok {
 		log.Fatalf("The key '%s' was not found in %s\n", project, path)
-		return nil
+		return ""
 	} else {
-		return &jsonBlob
+		return jsonBlob
 	}
 }
 
@@ -72,7 +72,7 @@ func EncodeDittoKeys(df interface{}) []byte {
 }
 
 func CreateAndWriteJson(path string, encoded []byte) {
-	newFile, err := os.Create(path)
+	newFile, err := os.Create(path) // os.OpenFile(path, os.O_RDWR|os.O_CREATE|os.O_EXCL, 0666)?
 	if err != nil {
 		log.Printf("Could not create file %s: %s", path, err)
 	}
