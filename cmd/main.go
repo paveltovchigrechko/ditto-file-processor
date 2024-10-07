@@ -1,71 +1,41 @@
 package main
 
 import (
-	"encoding/json"
 	"log"
-	"os"
 
 	"github.com/paveltovchigrechko/ditto-file-processor/internal/ditto"
+	"github.com/paveltovchigrechko/ditto-file-processor/internal/helpers"
+	"github.com/paveltovchigrechko/ditto-file-processor/internal/validators"
 )
 
 const (
 	inputDir  string = "../input/"
 	outputDir string = "../output/"
-
-	prefix string = ""
-	indent string = "    "
 )
 
 func main() {
-	// Catch the project name (it is the key in the resulting map) and the output file name (locale)
-	files, err := os.ReadDir(inputDir)
+	files := ditto.ReadDittoFiles(inputDir)
+	err := validators.ValidateFiles(files, inputDir)
 	if err != nil {
-		log.Println(err)
+		log.Fatal(err)
 	}
 
 	for _, file := range files {
-		projectName, localeName := ditto.SplitProjectAndLocale(file.Name())
+		fn := file.Name()
+		projectName, localeName := ditto.SplitProjectAndLocale(fn)
 
-		// Open file
-		f, err := os.ReadFile(inputDir + file.Name())
+		err := validators.ValidateNames(projectName, localeName, fn)
 		if err != nil {
-			log.Println(err)
+			continue
 		}
 
-		// Decode file and save it as map[projectName]json_blob
-		var m map[string]interface{}
-		err = json.Unmarshal(f, &m)
-		if err != nil {
-			log.Println(err)
-		}
+		dittoJson := ditto.ExtractDittoKeys(inputDir+fn, projectName)
 
-		// Extract JSON blob
-		jsonBlob := m[projectName] // Handle error
+		encodedDitto := ditto.EncodeDittoKeys(dittoJson)
 
-		// Encode the blob into JSON
-		encodedBlob, _ := json.MarshalIndent(jsonBlob, prefix, indent)
-		// fmt.Print(string(encodedBlob))
-		if err != nil {
-			log.Println(err)
-		}
-
-		// Create a JSON file and save JSON blob into it
 		// Might not work for Github action
-		err = os.Mkdir(outputDir, 0777)
-		if err != nil {
-			log.Println(err)
-		}
-
-		newFile, err := os.Create(outputDir + localeName)
-		// Why it is output in console
-		if err != nil {
-			log.Println(err)
-		}
-
-		_, err = newFile.Write(encodedBlob)
-		if err != nil {
-			log.Println(err)
-		}
+		helpers.CreateDir(outputDir)
+		ditto.CreateAndWriteJson(outputDir+localeName, encodedDitto)
 	}
 }
 
