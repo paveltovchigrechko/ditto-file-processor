@@ -26,6 +26,7 @@ func main() {
 
 		err := validators.ValidateNames(projectName, localeName, fn)
 		if err != nil {
+			log.Println(err)
 			continue
 		}
 
@@ -45,3 +46,4 @@ func main() {
 // 2. Split the main() -> separate functions
 // 3. Make this program as a part of pipeline: accept a single file (or filename) and output the result in std.Out
 // 4. Think about Unicode in encoded JSON
+// 5. Log errors on one level
