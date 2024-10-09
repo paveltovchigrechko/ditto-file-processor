@@ -3,17 +3,26 @@ package helpers
 import (
 	"log"
 	"os"
-
-	"github.com/paveltovchigrechko/ditto-file-processor/internal/validators"
 )
 
 func CreateDir(path string) {
-	dirExists, _ := validators.DirExists(path)
+	exists, _ := dirExists(path)
 
-	if !dirExists {
+	if !exists {
 		err := os.Mkdir(path, 0777)
 		if err != nil {
 			log.Println(err)
 		}
 	}
+}
+
+func dirExists(path string) (bool, error) {
+	_, err := os.Stat(path)
+	if err == nil {
+		return true, nil
+	}
+	if os.IsNotExist(err) {
+		return false, nil
+	}
+	return false, err
 }

@@ -3,7 +3,6 @@ package validators
 import (
 	"fmt"
 	"io/fs"
-	"os"
 )
 
 func ValidateFiles(files []fs.DirEntry, dir string) error {
@@ -21,15 +20,4 @@ func ValidateNames(project, locale, fn string) error {
 	}
 
 	return nil
-}
-
-func DirExists(path string) (bool, error) {
-	_, err := os.Stat(path)
-	if err == nil {
-		return true, nil
-	}
-	if os.IsNotExist(err) {
-		return false, nil
-	}
-	return false, err
 }

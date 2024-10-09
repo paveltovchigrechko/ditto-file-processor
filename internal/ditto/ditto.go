@@ -1,6 +1,7 @@
 package ditto
 
 import (
+	"bytes"
 	"encoding/json"
 	"io/fs"
 	"log"
@@ -31,7 +32,7 @@ func ReadDittoFiles(dir string) []fs.DirEntry {
 func SplitProjectAndLocale(filename string) (string, string) {
 	splitted := strings.Split(filename, nameSep)
 	if len(splitted) < 3 {
-		log.Printf("%s has incorrect name format, expeted: 'components__project__locale.json'\n", filename)
+		log.Printf("%s has incorrect name format, expected: 'components__project__locale.json'\n", filename)
 		return "", ""
 	}
 
@@ -62,13 +63,18 @@ func ExtractDittoKeys(path, project string) interface{} {
 }
 
 func EncodeDittoKeys(df interface{}) []byte {
-	encodedBlob, err := json.MarshalIndent(df, prefix, indent)
+	buffer := &bytes.Buffer{}
+	encoder := json.NewEncoder(buffer)
+	encoder.SetEscapeHTML(false)
+	encoder.SetIndent(prefix, indent)
+
+	err := encoder.Encode(df)
 	if err != nil {
 		log.Printf("Could not encode Ditto keys: %s\n", err)
 		return nil
 	}
 
-	return encodedBlob
+	return buffer.Bytes()
 }
 
 func CreateAndWriteJson(path string, encoded []byte) {
