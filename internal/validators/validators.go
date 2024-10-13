@@ -6,7 +6,7 @@ import (
 )
 
 func ValidateFiles(files []fs.DirEntry, dir string) error {
-	if files == nil {
+	if len(files) == 0 {
 		return fmt.Errorf("no files in %s", dir)
 	}
 	return nil
@@ -14,9 +14,9 @@ func ValidateFiles(files []fs.DirEntry, dir string) error {
 
 func ValidateNames(project, locale, fn string) error {
 	if project == "" {
-		return fmt.Errorf("project name was not parsed for '%s'", fn)
+		return fmt.Errorf("project name was not parsed for %s", fn)
 	} else if locale == "" {
-		return fmt.Errorf("locale was not parsed for '%s'", fn)
+		return fmt.Errorf("locale was not parsed for %s", fn)
 	}
 
 	return nil

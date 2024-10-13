@@ -31,7 +31,7 @@ func ReadDittoFiles(dir string) []fs.DirEntry {
 
 func SplitProjectAndLocale(filename string) (string, string) {
 	splitted := strings.Split(filename, nameSep)
-	if len(splitted) < 3 {
+	if len(splitted) != 3 {
 		log.Printf("%s has incorrect name format, expected: 'components__project__locale.json'\n", filename)
 		return "", ""
 	}

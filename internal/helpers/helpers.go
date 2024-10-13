@@ -6,7 +6,10 @@ import (
 )
 
 func CreateDir(path string) {
-	exists, _ := dirExists(path)
+	exists, err := dirExists(path)
+	if err != nil {
+		log.Printf("Error when defining if the directory %s exists: %s\n", path, err)
+	}
 
 	if !exists {
 		err := os.Mkdir(path, 0777)
