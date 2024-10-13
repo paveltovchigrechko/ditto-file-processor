@@ -1,6 +1,7 @@
 package ditto
 
 import (
+	"bytes"
 	"encoding/json"
 	"log"
 	"os"
@@ -51,13 +52,17 @@ func ExtractDittoKeys(path, project string) interface{} {
 }
 
 func EncodeDittoKeys(df interface{}) []byte {
-	encodedBlob, err := json.MarshalIndent(df, prefix, indent)
+	buffer := &bytes.Buffer{}
+	encoder := json.NewEncoder(buffer)
+	encoder.SetEscapeHTML(false)
+	encoder.SetIndent(prefix, indent)
+	err := encoder.Encode(df)
 	if err != nil {
 		log.Printf("Could not encode Ditto keys: %s\n", err)
 		return nil
 	}
 
-	return encodedBlob
+	return buffer.Bytes()
 }
 
 func defineLocale(s string) string {
