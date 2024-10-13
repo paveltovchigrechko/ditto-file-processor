@@ -6,17 +6,6 @@ import (
 	"os"
 )
 
-func CreateDir(path string) {
-	dirExists, _ := dirExists(path)
-
-	if !dirExists {
-		err := os.Mkdir(path, 0777)
-		if err != nil {
-			log.Println(err)
-		}
-	}
-}
-
 func ReadArgs() []string {
 	args := os.Args[1:]
 	fmt.Println(args)
@@ -25,15 +14,4 @@ func ReadArgs() []string {
 	}
 
 	return args
-}
-
-func dirExists(path string) (bool, error) {
-	_, err := os.Stat(path)
-	if err == nil {
-		return true, nil
-	}
-	if os.IsNotExist(err) {
-		return false, nil
-	}
-	return false, err
 }
