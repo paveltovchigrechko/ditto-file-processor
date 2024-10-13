@@ -4,12 +4,10 @@ import (
 	"fmt"
 	"log"
 	"os"
-
-	"github.com/paveltovchigrechko/ditto-file-processor/internal/validators"
 )
 
 func CreateDir(path string) {
-	dirExists, _ := validators.DirExists(path)
+	dirExists, _ := dirExists(path)
 
 	if !dirExists {
 		err := os.Mkdir(path, 0777)
@@ -27,4 +25,15 @@ func ReadArgs() []string {
 	}
 
 	return args
+}
+
+func dirExists(path string) (bool, error) {
+	_, err := os.Stat(path)
+	if err == nil {
+		return true, nil
+	}
+	if os.IsNotExist(err) {
+		return false, nil
+	}
+	return false, err
 }

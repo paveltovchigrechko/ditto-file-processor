@@ -2,7 +2,6 @@ package ditto
 
 import (
 	"encoding/json"
-	"io/fs"
 	"log"
 	"os"
 	"strings"
@@ -17,16 +16,6 @@ const (
 	baseLocale    string = "base.json"
 	defaultLocale string = "en.default.json"
 )
-
-func ReadDittoFiles(dir string) []fs.DirEntry {
-	files, err := os.ReadDir(dir)
-	if err != nil {
-		log.Println(err)
-		return nil
-	}
-
-	return files
-}
 
 func SplitProjectAndLocale(filename string) (string, string) {
 	splitted := strings.Split(filename, nameSep)
@@ -69,18 +58,6 @@ func EncodeDittoKeys(df interface{}) []byte {
 	}
 
 	return encodedBlob
-}
-
-func CreateAndWriteJson(path string, encoded []byte) {
-	newFile, err := os.Create(path) // os.OpenFile(path, os.O_RDWR|os.O_CREATE|os.O_EXCL, 0666)?
-	if err != nil {
-		log.Printf("Could not create file %s: %s", path, err)
-	}
-
-	_, err = newFile.Write(encoded)
-	if err != nil {
-		log.Printf("Could not write to file %s: %s", path, err)
-	}
 }
 
 func defineLocale(s string) string {
