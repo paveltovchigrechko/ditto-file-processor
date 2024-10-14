@@ -3,7 +3,6 @@ package ditto
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"io/fs"
 	"log"
 	"os"
@@ -76,7 +75,6 @@ func EncodeDittoKeys(df interface{}) []byte {
 		log.Printf("Could not encode Ditto keys: %s\n", err)
 		return nil
 	}
-	fmt.Printf("encoder: %v\n", encoder)
 	return buffer.Bytes()
 }
 
