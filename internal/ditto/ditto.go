@@ -3,6 +3,7 @@ package ditto
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"io/fs"
 	"log"
 	"os"
@@ -46,16 +47,18 @@ func ExtractDittoKeys(path, project string) interface{} {
 	f, err := os.ReadFile(path)
 	if err != nil {
 		log.Printf("Could not read %s: %s\n", path, err)
+		return nil
 	}
 
 	var m map[string]interface{}
 	err = json.Unmarshal(f, &m)
 	if err != nil {
-		log.Fatalf("Could not unmarchall %s: %s\n", path, err)
+		log.Printf("Could not unmarchall %s: %s\n", path, err)
+		return nil
 	}
 
 	if jsonBlob, ok := m[project]; !ok {
-		log.Fatalf("The key '%s' was not found in %s\n", project, path)
+		log.Printf("The key '%s' was not found in %s\n", project, path)
 		return nil
 	} else {
 		return &jsonBlob
@@ -73,7 +76,7 @@ func EncodeDittoKeys(df interface{}) []byte {
 		log.Printf("Could not encode Ditto keys: %s\n", err)
 		return nil
 	}
-
+	fmt.Printf("encoder: %v\n", encoder)
 	return buffer.Bytes()
 }
 

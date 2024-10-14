@@ -31,6 +31,9 @@ func main() {
 		}
 
 		dittoJson := ditto.ExtractDittoKeys(inputDir+fn, projectName)
+		if dittoJson == nil {
+			continue
+		}
 
 		encodedDitto := ditto.EncodeDittoKeys(dittoJson)
 
