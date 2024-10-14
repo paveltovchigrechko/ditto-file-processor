@@ -1,22 +1,22 @@
 package helpers
 
 import (
-	"log"
 	"os"
 )
 
-func CreateDir(path string) {
+func CreateDir(path string) error {
 	exists, err := dirExists(path)
 	if err != nil {
-		log.Printf("Error when defining if the directory %s exists: %s\n", path, err)
+		return err
 	}
 
 	if !exists {
 		err := os.Mkdir(path, 0777)
 		if err != nil {
-			log.Println(err)
+			return err
 		}
 	}
+	return nil
 }
 
 func dirExists(path string) (bool, error) {

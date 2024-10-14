@@ -3,8 +3,8 @@ package ditto
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"io/fs"
-	"log"
 	"os"
 	"strings"
 )
@@ -19,52 +19,47 @@ const (
 	defaultLocale string = "en.default.json"
 )
 
-func ReadDittoFiles(dir string) []fs.DirEntry {
+func ReadDittoFiles(dir string) ([]fs.DirEntry, error) {
 	files, err := os.ReadDir(dir)
 	if err != nil {
-		log.Println(err)
-		return nil
+		return nil, err
 	}
 
-	return files
+	return files, nil
 }
 
-func SplitProjectAndLocale(filename string) (string, string) {
+func SplitProjectAndLocale(filename string) (string, string, error) {
 	splitted := strings.Split(filename, nameSep)
 	if len(splitted) != 3 {
-		log.Printf("%s has incorrect name format, expected: 'components__project__locale.json'\n", filename)
-		return "", ""
+		return "", "", fmt.Errorf("%s has incorrect name format, expected: 'components__project__locale.json'", filename)
 	}
 
 	projectName := splitted[1]
 	variant := splitted[2]
 	locale := defineLocale(variant)
-	return projectName, locale
+	return projectName, locale, nil
 }
 
-func ExtractDittoKeys(path, project string) interface{} {
+func ExtractDittoKeys(path, project string) (interface{}, error) {
 	f, err := os.ReadFile(path)
 	if err != nil {
-		log.Printf("Could not read %s: %s\n", path, err)
-		return nil
+		return nil, fmt.Errorf("could not read %s: %s", path, err)
 	}
 
 	var m map[string]interface{}
 	err = json.Unmarshal(f, &m)
 	if err != nil {
-		log.Printf("Could not unmarchall %s: %s\n", path, err)
-		return nil
+		return nil, fmt.Errorf("could not unmarchall %s: %s", path, err)
 	}
 
 	if jsonBlob, ok := m[project]; !ok {
-		log.Printf("The key '%s' was not found in %s\n", project, path)
-		return nil
+		return nil, fmt.Errorf("the key '%s' was not found in %s", project, path)
 	} else {
-		return &jsonBlob
+		return &jsonBlob, nil
 	}
 }
 
-func EncodeDittoKeys(df interface{}) []byte {
+func EncodeDittoKeys(df interface{}) ([]byte, error) {
 	buffer := &bytes.Buffer{}
 	encoder := json.NewEncoder(buffer)
 	encoder.SetEscapeHTML(false)
@@ -72,22 +67,22 @@ func EncodeDittoKeys(df interface{}) []byte {
 
 	err := encoder.Encode(df)
 	if err != nil {
-		log.Printf("Could not encode Ditto keys: %s\n", err)
-		return nil
+		return nil, fmt.Errorf("could not encode Ditto keys: %s", err)
 	}
-	return buffer.Bytes()
+	return buffer.Bytes(), nil
 }
 
-func CreateAndWriteJson(path string, encoded []byte) {
+func CreateAndWriteJson(path string, encoded []byte) error {
 	newFile, err := os.Create(path)
 	if err != nil {
-		log.Printf("Could not create file %s: %s", path, err)
+		return fmt.Errorf("could not create file %s: %s", path, err)
 	}
 
 	_, err = newFile.Write(encoded)
 	if err != nil {
-		log.Printf("Could not write to file %s: %s", path, err)
+		return fmt.Errorf("could not write to file %s: %s", path, err)
 	}
+	return nil
 }
 
 func defineLocale(s string) string {
