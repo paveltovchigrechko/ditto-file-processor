@@ -9,6 +9,7 @@ import (
 	"strings"
 )
 
+//go:generate mockery --all --output=./test/unit/mocks --with-expecter=true
 const (
 	nameSep      string = "__"
 	extensionSep string = "."
@@ -19,8 +20,18 @@ const (
 	defaultLocale string = "en.default.json"
 )
 
-func ReadDittoFiles(dir string) ([]fs.DirEntry, error) {
-	files, err := os.ReadDir(dir)
+type DittoHelper struct {
+	osp OSProvider
+}
+
+func New(osp OSProvider) *DittoHelper {
+	return &DittoHelper{
+		osp: osp,
+	}
+}
+
+func (dh DittoHelper) ReadDittoFiles(dir string) ([]fs.DirEntry, error) {
+	files, err := dh.osp.ReadDir(dir)
 	if err != nil {
 		return nil, err
 	}

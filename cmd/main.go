@@ -14,7 +14,8 @@ const (
 )
 
 func main() {
-	files, err := ditto.ReadDittoFiles(inputDir)
+	dh := ditto.New(ditto.OSWrapper{})
+	files, err := dh.ReadDittoFiles(inputDir)
 	if err != nil {
 		log.Fatal(err)
 	}
