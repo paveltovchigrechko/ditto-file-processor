@@ -48,7 +48,7 @@ func main() {
 			log.Println(err)
 			continue
 		}
-		// Might not work for Github action
+
 		err = helpers.CreateDir(outputDir)
 		if err != nil {
 			log.Println(err)
@@ -70,3 +70,6 @@ func main() {
 // 3. DONE Make this program as a part of pipeline: accept a single file (or filename) and output the result in std.Out
 // 4. DONE Think about Unicode in encoded JSON
 // 5. DONE Log errors on one level: let functions return error as the last parameter
+// 6. Dockerfile
+// 7. action.yml
+// 8. Research 'hugo-pages-generator-github-action' where is used

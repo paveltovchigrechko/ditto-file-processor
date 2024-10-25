@@ -6,13 +6,10 @@ import (
 	"io/fs"
 	"os"
 	"testing"
+
+	mocks "github.com/paveltovchigrechko/ditto-file-processor/internal/ditto/mocks"
+	"github.com/stretchr/testify/mock"
 )
-
-type mockReader struct{}
-
-func (mr mockReader) ReadDir(string) ([]fs.DirEntry, error) {
-	return []fs.DirEntry{}, nil
-}
 
 func TestSplitProjectNameAndLocale(t *testing.T) {
 	tests := []struct {
@@ -118,38 +115,31 @@ func TestSplitProjectNameAndLocale(t *testing.T) {
 }
 
 func TestReadDittoFilesCorrect(t *testing.T) {
-	// Split scenarios into 3 tests (correct / empty / incorrect)
-	// Alternative: mockup file system interface
-	// 1. Create structure DittoHelper
-	// 2. Make all ditto functions -> new struct methods
-	// 3. Define interface{} OSProvider with ReadDir method
-	// 4. Add a DittoHelper structure field with OSProvider type
-	// 5. Inside ReadDittoFile call OSProvider instead of std.os.ReadDir
-	dh := New(OSWrapper{})
-	dir := "../../test/correct"
-	files, err := dh.ReadDittoFiles(dir)
+	var transactorMock = mocks.NewOSProvider(t)
+	expectedErr := fmt.Errorf("Some error")
 
-	// expected := mockReader{}
-	if files == nil {
-		t.Errorf("No files were read in %s. Expected to read one file\n", dir)
+	transactorMock.On("ReadDir", mock.Anything).Return([]fs.DirEntry{}, expectedErr)
+
+	dh := New(transactorMock)
+	result, err := dh.ReadDittoFiles("some-path")
+	if len(result) != 0 {
+		t.Errorf("Expected len result == 0, got=%d", len(result))
 	}
-	if len(files) != 1 {
-		t.Errorf("Wrong number of files read, expected=1, got=%d\n", len(files))
-	}
-	if err != nil {
-		t.Errorf("Error while reading directory: %s. Expected error equal nil\n", err)
+	if !errors.Is(err, expectedErr) {
+		t.Errorf("wrong error, got=%s, want=%s", err.Error(), expectedErr.Error())
 	}
 }
 
 func TestReadDittoFilesEmpty(t *testing.T) {
-	dh := New(OSWrapper{})
-	dir := "../../test/empty"
-	files, err := dh.ReadDittoFiles(dir)
-	if files == nil {
-		t.Errorf("No files were read in %s. Expected to read one file\n", dir)
-	}
+	var transactorMock = mocks.NewOSProvider(t)
+
+	transactorMock.On("ReadDir", mock.Anything).Return([]fs.DirEntry{}, nil)
+
+	dh := New(transactorMock)
+	files, err := dh.ReadDittoFiles("some-path")
+
 	if len(files) != 0 {
-		t.Errorf("Wrong number of files read, expected=1, got=%d\n", len(files))
+		t.Errorf("Wrong number of files read, expected=0, got=%d\n", len(files))
 	}
 	if err != nil {
 		t.Errorf("Error while reading directory: %s. Expected error equal nil\n", err)
@@ -157,9 +147,12 @@ func TestReadDittoFilesEmpty(t *testing.T) {
 }
 
 func TestReadDittoFilesWrong(t *testing.T) {
-	dh := New(OSWrapper{})
-	dir := "wrong_path"
-	files, err := dh.ReadDittoFiles(dir)
+	var transactorMock = mocks.NewOSProvider(t)
+
+	transactorMock.On("ReadDir", mock.Anything).Return(nil, fmt.Errorf("Some error"))
+	dh := New(transactorMock)
+	files, err := dh.ReadDittoFiles("some-path")
+
 	if files != nil {
 		t.Errorf("Files != nil. Expected files == nil\n")
 	}

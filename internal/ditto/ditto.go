@@ -9,7 +9,7 @@ import (
 	"strings"
 )
 
-//go:generate mockery --all --output=./test/unit/mocks --with-expecter=true
+//go:generate mockery --all --output=./mocks --with-expecter=true
 const (
 	nameSep      string = "__"
 	extensionSep string = "."
