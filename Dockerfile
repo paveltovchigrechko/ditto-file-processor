@@ -1,4 +1,6 @@
-FROM golang:1.23
+FROM golang:1.23-alpine
+
+WORKDIR /app
 
 COPY go.mod go.sum ./
 
@@ -6,6 +8,6 @@ RUN go mod download
 
 COPY . .
 
-RUN go build -o ditto-file-processor
+RUN go build -o /app/cmd/main /app/cmd/main.go
 
-CMD [ "ditto-file-processor ]
+RUN ["/app/cmd/main"]
