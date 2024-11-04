@@ -1,1 +1,6 @@
 .git/
+.github/
+input/
+output/
+test/
+TODO.txt
