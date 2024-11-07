@@ -1,0 +1,81 @@
+name: Build and push docker image
+ 
+on:
+  workflow_call:
+    inputs:
+      image_name:
+        description: set image name
+        required: true
+        type: string
+      aws_region:
+        description: set image name
+        required: true
+        type: string
+      docker_path:
+        description: set docker path
+        required: true
+        type: string
+      main_file_path:
+        description: set cmd go file
+        required: true
+        type: string
+    secrets:
+      AWS_ACCESS_KEY_ID:
+        required: true
+      AWS_SECRET_ACCESS_KEY:
+        required: true
+ 
+jobs:
+  vendor:
+    timeout-minutes: 15
+    runs-on: k8s-runner
+    steps:
+      -
+        name: Checkout
+        uses: actions/checkout@v3
+      -
+        name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+      -
+        name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3  
+      -
+        name: Extract metadata (tags, labels) for store Docker
+        id: docker_meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ inputs.image_name }}
+          tags: |
+            type=ref,enable=true,priority=600,suffix=-{{sha}},event=branch
+            type=raw,value={{branch}},event=branch
+            type=raw,value={{tag}},event=tag
+      - 
+        name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ inputs.aws_region }}
+      - 
+        name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+      -
+        name: Setup golang
+        uses: actions/setup-go@v4
+        with:
+          go-version: 1.23
+      -
+        name: Build application
+        run: CGO_ENABLED=0 GOOS=linux go build ./${{ inputs.main_file_path }}
+      -
+        name: Build and push image
+        uses: docker/build-push-action@v6
+        with:
+          file: ${{ inputs.docker_path }}
+          platforms: linux/amd64,linux/arm64
+          push: true
+          context: .
+          tags: ${{ steps.docker_meta.outputs.tags }}
+          labels: ${{ steps.docker_meta.outputs.labels }}
+          no-cache: true
